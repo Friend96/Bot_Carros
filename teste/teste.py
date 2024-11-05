@@ -16,7 +16,7 @@ def play_bot():
         servico = Service(EdgeChromiumDriverManager().install())
         options = webdriver.EdgeOptions()
         options.add_argument("--incognito")
-        # options.add_argument("--headless")
+        options.add_argument("--headless")
 
         def AbrirNav(url):
             global navegador
