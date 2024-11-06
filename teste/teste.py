@@ -2,6 +2,7 @@ import threading
 import time
 
 def play_bot():
+    
     def Começar_bot():
         from selenium import webdriver
         from webdriver_manager.microsoft import EdgeChromiumDriverManager
@@ -11,12 +12,11 @@ def play_bot():
         from selenium.webdriver.common.keys import Keys
         from selenium.webdriver.support.ui import WebDriverWait
         import json
-        
 
         servico = Service(EdgeChromiumDriverManager().install())
         options = webdriver.EdgeOptions()
         options.add_argument("--incognito")
-        options.add_argument("--headless")
+        # options.add_argument("--headless")
 
         def AbrirNav(url):
             global navegador
@@ -30,6 +30,9 @@ def play_bot():
 
         global pagina
         pagina = 0
+        
+        global novos_carro
+        novos_carro = []
 
         while True:
             pagina = pagina + 1
@@ -69,6 +72,7 @@ def play_bot():
                 navegador.execute_script("window.scrollBy(0, 1200);")
                 navegador.set_window_size(1300, 768)
                 time.sleep(1)
+
 
                 # vendedor
                 try:
@@ -122,37 +126,68 @@ def play_bot():
                     except:
                         ano_carro = "Não encontrado"
                 
+                # Motor
+                try:
+                    motor_carro = navegador.find_element(By.XPATH, '//*[@id="slideEffect"]/div[20]/div/div[1]/div[2]/div[1]/div[4]/div/div[3]/div/div[2]/div[2]').text
+                except:
+                    try:
+                        motor_carro = navegador.find_element(By.XPATH, '//*[@id="slideEffect"]/div[19]/div/div[1]/div[2]/div[1]/div[4]/div/div[3]/div/div[2]/div[2]').text
+                    except:
+                        motor_carro = "Não encontrado"
+
+                # Cambio
+                try:
+                    cambio_carro = navegador.find_element(By.XPATH, '//*[@id="slideEffect"]/div[20]/div/div[1]/div[2]/div[1]/div[4]/div/div[3]/div/div[4]/div[2]').text
+                except:
+                    try:
+                        cambio_carro = navegador.find_element(By.XPATH, '//*[@id="slideEffect"]/div[19]/div/div[1]/div[2]/div[1]/div[4]/div/div[3]/div/div[4]/div[2]').text
+                    except:
+                        cambio_carro = "Não encontrado"
+
+
                 if type(valor) == str:
-                    print()
-                    print(f'\033[1;32m Nome: {nome_carro} \n Preço: {preco_carro} \n Contato: {valor} \n Quilometragem: {Quilometragem_carro} \n Ano: {ano_carro} \033[m')
-                    print()
+
+                    print(f'\033[1;32m \n Nome: {nome_carro} \n Preço: {preco_carro} \n Contato: {valor} \n Quilometragem: {Quilometragem_carro} \n Ano: {ano_carro} \n Motor: {motor_carro} \n Câmbio: {cambio_carro} \n \033[m')
+
                 else:
-                    print()
-                    print(f'\033[1;32m Nome: {nome_carro} \n Preço: {preco_carro} \n Contato: {valor.text} \n Quilometragem: {Quilometragem_carro} \n Ano: {ano_carro} \033[m')
-                    print()
+
+                    print(f'\033[1;32m \n Nome: {nome_carro} \n Preço: {preco_carro} \n Contato: {valor.text} \n Quilometragem: {Quilometragem_carro} \n Ano: {ano_carro} \n Motor: {motor_carro} \n Câmbio: {cambio_carro} \n \033[m')
+
                     DADOS_carro = {
                         "nome": nome_carro,
                         "preço": preco_carro,
                         "contato": valor.text,
                         "quilometragem": Quilometragem_carro,
-                        "ano": ano_carro
+                        "ano": ano_carro,
+                        "motor": motor_carro,
+                        "câmbio": cambio_carro
                     }
+                    
                     try:
                         with open('./teste/fones.json', 'r') as file:
                             dados_carros = json.load(file)
+
                     except:
                         dados_carros = []
+
+                    if DADOS_carro in novos_carro:
+                        pass
+                    else:
+                        novos_carro.append(DADOS_carro)
+                    
                     if DADOS_carro in dados_carros:
                         pass
                     else:
                         dados_carros.append(DADOS_carro)
-                    
+                              
                     with open('./teste/fones.json', 'w') as file:
                         json.dump(dados_carros, file, ensure_ascii=False, indent=4)
 
 
                 navegador.quit()
 
+        with open('./teste/fones.json', 'w') as file:
+            json.dump(novos_carro, file, ensure_ascii=False, indent=4)
 
         '''
             AbrirNav('https://api.whatsapp.com/send?phone=')
